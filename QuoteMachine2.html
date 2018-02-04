@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Quote Exercise</title>
+	<link rel="stylesheet" href="qm.css">
+</head>
+<body>
+	<section class="wrapper">
+		<button id="btn">New Quote!</button>
+		<div class="wrapper-img">
+			<div class="bc-img"></div>
+			<div class="text left">
+				<h1 id="author-left">I saig left</h1>
+				<p id="text-left">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Esse laudantium culpa molestias unde, non voluptate.</p>
+			</div>
+			<div class="text right">
+				<h1 id="author-right">I saig right</h1>
+				<p id="text-right">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem, voluptas!</p>
+			</div>
+		</div>
+		
+	</section>
+
+
+	<script src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js'></script>
+
+	<script>
+		$(document).ready(function() {
+			
+
+			$("#btn").on("click", function() {
+				getNewQuoteRight();
+			});
+
+			function getNewQuote() {
+				$.ajax({
+					url: "https://api.forismatic.com/api/1.0/",
+					jsonp: 'jsonp',
+					dataType: 'jsonp',
+					data: {
+						method: "getQuote",
+						lang: 'en',
+						format: 'jsonp'
+					},
+					success: function(response) {
+						newQuote = response.quoteText;
+						console.log(newQuote);
+					}
+				});
+			};
+			
+			function getNewQuoteRight() {
+				var newQuote = "s";
+
+				getNewQuote();
+				console.log(newQuote);
+			};
+
+
+		});
+			
+		/*$(document).ready(function() {
+			$("#btn").on("click", function() {
+				getNewQuote();
+			});
+			
+			function getNewQuote() {
+				$.ajax({
+					url: "https://api.forismatic.com/api/1.0/",
+					jsonp: 'jsonp',
+					dataType: 'jsonp',
+					data: {
+						method: "getQuote",
+						lang: 'en',
+						format: 'jsonp'
+					},
+					success: function(response) {
+						console.log(response.quoteText);
+					}
+
+				});
+			};
+		}); */
+
+		/*document.getElementById("btn").addEventListener("click", findQuote);
+		function findQuote() {
+			//console.log("Bla-bla");
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "https://api.forismatic.com/api/1.0/?method=getQuote&format=jsonp&lang=en&jsonp=?", true);
+			xhr.onload = function() {
+				if (this.status == 200) {
+					var quote = this.responseText;
+					console.log(quote);
+				}
+			}
+			xhr.send();
+		};*/
+
+	</script>
+</body>
+</html>
