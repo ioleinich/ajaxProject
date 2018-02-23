@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		.hideBlock {
+			display: none;
+		}
+		#result {
+			width: 90vw;
+			overflow: hidden;
+			text-align: center;
+		}
+		#result>div {
+			border: 1px solid black;
+			display: inline-block;
+			padding: 20px;
+			margin: 10px;
+		}
+	</style>
+</head>
+<body>
+	<p>
+		<label for="position">
+			<input type="radio" name="position" value="1" checked> Detect your location
+			<input type="radio" name="position" value="2"> Coose city (in UA)
+		</label>
+	</p>
+	<div class="hideBlock" id="additionalOptions">
+		<input type="text" id="city" placeholder="Enter city">
+		<p>
+			<label for="forecastByTime">
+				<input type="radio" name="forecastByTime" value="">Forecast for one day
+				<input type="radio" name="forecastByTime" value="">Forecast for five days
+			</label>
+		</p>
+		<p>
+			<select name="country" id="country">
+				<option disabled value="us">Choose country</option>
+				<option value="ua">Ukraine</option>
+				<option value="us">USA</option>
+				<option value="uk">Great Britain</option>
+				<option value="ch">Switzerland</option>	
+			</select>
+		</p>
+	</div>
+	
+	<p>
+		<button id="btn">Submit</button>
+	</p>
+	<div id="result"></div>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+	var methodForLocation = 0;
+	var position = document.getElementsByName("position");
+	var cityPosition = {};
+
+	// Прячем или открываем дополнительные окна для выбора городаж;
+	(function chooseMethod() {
+		for (var i = 0; i < position.length; i++) {
+			position[i].onchange = takeMethod;
+		};
+
+		function takeMethod() {
+		methodTest = this.value; 
+		var additionalOption = document.getElementById("additionalOptions");
+			if (methodTest == 1) {
+				additionalOption.classList.add("hideBlock");
+			} else {
+				additionalOption.classList.remove("hideBlock");
+			};
+		}
+	})();
+
+	// Алгоритм управления
+	var btn = document.getElementById("btn");
+	btn.addEventListener("click", event => {
+		chooseLocation().then(chooseLocationMethod(methodForLocation));
+	});
+
+	// Функция считывает значение радиокнопки и переприсваивает управляющую переменную
+	function chooseLocation() {
+		return new Promise (function (resolve) {
+			for (var i = 0; i <= position.length; i++) {
+				if (position[i].checked) {
+					methodForLocation = position[i].value;
+					resolve(methodForLocation);
+					break;
+				}
+			}
+		})
+	};
+
+	//Цикл ветвления. В зависимости от значения управляющей переменной запускаются два разных запроса
+	function chooseLocationMethod(methodForLocation) {
+		if (methodForLocation == 1) {
+			getMyLocation()
+				.then(data => getCityDataByCoords(data))
+				.then(data => displayCityData(data.data.list));
+		} else {
+			var inputCity = getCity();
+			var inputCountry = getCountry();
+			getCityData(inputCity, inputCountry)
+				.then(data => {displayCityData(data.data.list)});
+		};
+	};
+
+	// Опредеоение Вашей геолокации
+	function getMyLocation() {
+		return new Promise (function(resolve, reject) {
+			if (navigator.geolocation) {
+				navigator.geolocation.getCurrentPosition(displayPosition, displayError);
+				// создание обьекта с данными геолокации
+				function displayPosition(position) {
+					cityPosition.lat = position.coords.latitude;
+					cityPosition.long = position.coords.longitude;
+					cityPosition.acc = position.coords.accuracy;
+					resolve (cityPosition);
+				};
+			} else {
+				alert ("Oops, you are not identified");
+				reject();
+			};
+		})	
+	};
+
+	//Проверка на ошибку при определении геолокации
+	function displayError(error) {
+		var errorTypes = {
+			0: "Unknown error",
+			1: "Permission denied by user",
+			2: "Position is not available",
+			3: "Request timed out"
+		};
+		var errorMessage = errorTypes[error.code];
+		if (error.code == 0 || error.code == 2) {
+			errorMessage = errorMessage + " " + error.message;
+		}
+		var text = document.getElementById("result");
+		text.innerHTML = errorMessage;
+	}
+
+	// AJAX запрос по географическим кооринатам: долготе и широте
+	function getCityDataByCoords(cityPosition) {
+		return axios.get(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityPosition.lat}&lon=${cityPosition.long}&APPID=f9aad3ae4567ffba3a3ad0ee677f8371`)
+	}
+
+	// комплекс для AJAX запроса по названиюю города и страны 
+	function getCountry() {
+		return document.getElementById("country").value;
+	};
+	function getCity() {
+		return document.getElementById("city").value;
+	};
+	function getCityData(city, country) {
+      return axios.get(`https://api.openweathermap.org/data/2.5/forecast?q=${city},${country}&APPID=f9aad3ae4567ffba3a3ad0ee677f8371`);
+    };
+
+    // Отображение пришедших данных
+	function displayCityData(list) {
+		var res = document.querySelector("#result");
+			while (res.firstElementChild) {
+				res.removeChild(res.firstChild);
+		}
+			createDaysList(list, res);				
+	};
+
+	function createDaysList (list, parentEl) {
+		
+		
+		
+		for (var i = 0, dayNumber = 0; i < list.length; i = i + 8, dayNumber++) {
+				var temp = Math.floor(list[i].main.temp - 273);
+				var tempDayName = dayName(dayNumber);
+				var wind = list[i].wind.speed;
+				parentEl.insertAdjacentHTML('beforeend', `<div>
+										<h3>${tempDayName}</h3>
+										<p> Temperature: ${temp}C</p>
+										<p> Wind: ${wind} m/s</p>
+										</div>`);
+			}
+	}
+
+function dayName (dayNumber) {
+	var date = new Date;
+	var day = date.getDay();
+	var tempDay = day+dayNumber - 1;
+	var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+	return tempDay < 7 ? days[tempDay] : days[tempDay - 7];
+}
+
+
+</script>
+</body>
+</html>
