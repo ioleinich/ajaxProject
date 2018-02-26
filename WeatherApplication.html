@@ -22,19 +22,17 @@
 </head>
 <body>
 	<p>
-		<label for="position">
+		<form>
+		<label>
 			<input type="radio" name="position" value="1" checked> Detect your location
-			<input type="radio" name="position" value="2"> Coose city (in UA)
 		</label>
+		<label>
+			<input type="radio" name="position" value="2"> Coose city
+		</label>
+		</form>
 	</p>
 	<div class="hideBlock" id="additionalOptions">
 		<input type="text" id="city" placeholder="Enter city">
-		<p>
-			<label for="forecastByTime">
-				<input type="radio" name="forecastByTime" value="">Forecast for one day
-				<input type="radio" name="forecastByTime" value="">Forecast for five days
-			</label>
-		</p>
 		<p>
 			<select name="country" id="country">
 				<option disabled value="us">Choose country</option>
@@ -53,49 +51,41 @@
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
-	var methodForLocation = 0;
-	var position = document.getElementsByName("position");
+	
 	var cityPosition = {};
-
+	var methodForLocation = 0;
+	
 	// Прячем или открываем дополнительные окна для выбора городаж;
-	(function chooseMethod() {
-		for (var i = 0; i < position.length; i++) {
-			position[i].onchange = takeMethod;
-		};
+	document
+      .querySelector('form')
+      .addEventListener('change', event => {
+      	takeMethod(event.target.value);
+	});
 
-		function takeMethod() {
-		methodTest = this.value; 
+	function takeMethod(val) { 
 		var additionalOption = document.getElementById("additionalOptions");
-			if (methodTest == 1) {
-				additionalOption.classList.add("hideBlock");
-			} else {
-				additionalOption.classList.remove("hideBlock");
-			};
-		}
-	})();
+		if (val == 2) {
+			additionalOption.classList.remove("hideBlock");
+		} else {
+			additionalOption.classList.add("hideBlock");
+		};
+	};
 
 	// Алгоритм управления
 	var btn = document.getElementById("btn");
-	btn.addEventListener("click", event => {
-		chooseLocation().then(chooseLocationMethod(methodForLocation));
-	});
+	btn.addEventListener("click", event => chooseLocationMethod(method()));
 
-	// Функция считывает значение радиокнопки и переприсваивает управляющую переменную
-	function chooseLocation() {
-		return new Promise (function (resolve) {
-			for (var i = 0; i <= position.length; i++) {
-				if (position[i].checked) {
-					methodForLocation = position[i].value;
-					resolve(methodForLocation);
-					break;
-				}
-			}
-		})
+	var method = function() {
+		var position = document.getElementsByName("position");
+		for (var i = 0; i <= position.length; i++) {
+				if (position[i].checked)
+					return position[i].value;
+		 };
 	};
 
 	//Цикл ветвления. В зависимости от значения управляющей переменной запускаются два разных запроса
-	function chooseLocationMethod(methodForLocation) {
-		if (methodForLocation == 1) {
+	function chooseLocationMethod(val) {
+		if (val == 1) {
 			getMyLocation()
 				.then(data => getCityDataByCoords(data))
 				.then(data => displayCityData(data.data.list));
@@ -103,7 +93,8 @@
 			var inputCity = getCity();
 			var inputCountry = getCountry();
 			getCityData(inputCity, inputCountry)
-				.then(data => {displayCityData(data.data.list)});
+				.then(data => {displayCityData(data.data.list)})
+				.catch(alert("Please, enter correct name for City and Country!"));
 		};
 	};
 
@@ -168,9 +159,6 @@
 	};
 
 	function createDaysList (list, parentEl) {
-		
-		
-		
 		for (var i = 0, dayNumber = 0; i < list.length; i = i + 8, dayNumber++) {
 				var temp = Math.floor(list[i].main.temp - 273);
 				var tempDayName = dayName(dayNumber);
@@ -183,15 +171,13 @@
 			}
 	}
 
-function dayName (dayNumber) {
-	var date = new Date;
-	var day = date.getDay();
-	var tempDay = day+dayNumber - 1;
-	var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-	return tempDay < 7 ? days[tempDay] : days[tempDay - 7];
-}
-
-
+	function dayName (dayNumber) {
+		var date = new Date;
+		var day = date.getDay();
+		var tempDay = day+dayNumber - 1;
+		var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+		return tempDay < 7 ? days[tempDay] : days[tempDay - 7];
+	}
 </script>
 </body>
 </html>

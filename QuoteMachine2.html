@@ -22,18 +22,22 @@
     		padding: 20px;
 			width: 70%;
 			border-radius: 20px;
+			transition: all 0.5s;
+			transform: scale(0.6);
+			opacity: 0;
+			float: left;
+			background-color: #2998ff;
 			
     	}
 
-    	.left {
-    		background-color: #2998ff;
-    		float: left;
-
-    			
-    	}
-    	.right {
-    		background-color: #7ed56f;
+    	.sms:nth-child(even) {
     		float: right;
+    		background-color: #7ed56f;
+    	}
+
+    	.sms.visible {
+    		opacity: 1;
+    		transform: scale(1);
     	}
   </style>
 </head>
@@ -54,25 +58,18 @@
 	document.querySelector("#button").addEventListener('click', event => {
 		getNewData()
 		.then(data => {return JSON.parse(data);})
-		// .then(data => {return data.title;})
 		.then(data => {
 			var div = document.createElement("div");
-    		div.className = "sms " +discussion();
+    		div.className = "sms";
     		var text = `<h3>${data.id} said: </h3><p>"${data.title}"</p>`;
     		div.innerHTML = text;
     		var main = document.getElementById("main");
     		main.appendChild(div);
+    		div.offsetHeight;
+        	div.classList.add('visible');
 		})
 		.catch((err) => console.log(err));
 	});
-
-	//Switcher between left and right classes
-	
-	function discussion() {
-		var orator = "left";
-		count++;
-		return count%2==0 ? orator = "right" : orator = "left";
-	}
 	
 	//Choose ID name on json file
 	function getRandomId(minPostNum, maxPostNum) {
