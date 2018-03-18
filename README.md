@@ -8,7 +8,11 @@ Instructions:
 5) Enjoy!
 
 Discussion:
+
 Following technologies were used: HTML, CSS, JavaScript ES6 syntax. I used standard XMLHttpRequest syntax in “Quote machine2” app. As a bonus, I used “AXIOS JS” library to great Ajax request in “Weather app”.
-Requirements
-“Weather app” help you to check weather for today or for the next five days. It uses real https://openweathermap.org API. As a desire location you can type desire city or you can use “Geolocation API from google” – connection between API, your browser and application are scripted. 
+
+Requirements:
+
+“Weather app” help you to check weather for today or for the next five days. It uses real https://openweathermap.org API. As a desire location you can type desire city or you can use “Geolocation API from google” – connection between API, your browser and application are scripted.
+
 “Quote machine” is modification on FreeCodeCamp home task. I used https://jsonplaceholder.typicode.com to create Ajax request. 
